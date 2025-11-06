@@ -1,7 +1,7 @@
 list1, list2, pairs = [], [], []
 
 # Generate lists
-with open("input.txt") as f:
+with open("./input.txt") as f:
     for x in f:
         pairs = x.split("   ")
         list1.append(pairs[0].strip())
@@ -20,7 +20,6 @@ def calc_appearances(x):
 for x in list1:
     if num_appearances.get(x) is None:
         num_appearances[x] = calc_appearances(x)
-        print(num_appearances[x])
     similarity += int(x) * num_appearances[x]
 
 
