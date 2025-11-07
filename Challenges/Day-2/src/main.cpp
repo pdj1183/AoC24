@@ -3,19 +3,18 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 using namespace std;
 
-int isSafe(string line) {
-  stringstream ss(line);
-  int prev, curr;
+int isSafe(vector<int> numbers) {
+  int prev = numbers[0];
+  int curr = numbers[1];
   bool increasing;
-  ss >> prev;
-  ss >> curr;
 
   int diff = curr - prev;
 
   if (0 == abs(diff) || abs(diff) > 3) {
-    cout << "First values of line were the same or too large. Prev: " << prev
+    cout << "First values were the same or too large. Prev: " << prev
          << " Curr: " << curr << endl;
     return -1; // Unsafe change too big or stayed same
   } else if (0 < diff) {
@@ -26,18 +25,21 @@ int isSafe(string line) {
 
   prev = curr;
 
-  while (ss >> curr) {
+  for (int i = 2; i < numbers.size(); i++) {
+    curr = numbers[i];
+
     if (increasing) {
       diff = curr - prev;
     } else {
       diff = prev - curr;
     }
 
-    cout << "Increasing is " << increasing << "and the diff is: " << diff
+    cout << "Increasing is " << increasing << " and the diff is: " << diff
          << endl;
 
-    if (0 >= diff | diff > 3)
+    if (0 >= diff || diff > 3) {
       return -1;
+    }
 
     prev = curr;
   }
@@ -47,8 +49,14 @@ int isSafe(string line) {
 int main(int argc, char *argv[]) {
 
   if (argc < 2) {
-    cerr << "Usage: " << argv[0] << " <input_file>" << endl;
+    cerr << "Usage: " << argv[0] << " <input_file> [--damper]" << endl;
     return 1;
+  }
+
+  bool damper = false;
+  if (argc >= 3 && string(argv[2]) == "--damper") {
+    damper = true;
+    cout << "Damper mode enabled" << endl;
   }
 
   ifstream input(argv[1]);
@@ -57,11 +65,33 @@ int main(int argc, char *argv[]) {
   if (input.is_open()) {
     string line;
     while (getline(input, line)) {
-      if (isSafe(line) == 1) {
+      vector<int> numbers;
+      stringstream ss(line);
+      int num;
+      while (ss >> num) {
+        numbers.push_back(num);
+      }
+
+      if (isSafe(numbers) == 1) {
         cout << line << " IS Safe" << endl;
         safe += 1;
+      } else {
+        cout << line << " is NOT safe" << endl;
+        if (damper) {
+          cout << "Trying with damper active!" << endl;
+          // Try removing each number one at a time
+          for (int i = 0; i < numbers.size(); i++) {
+            vector<int> dampened = numbers;
+            dampened.erase(dampened.begin() + i);
+            if (isSafe(dampened) == 1) {
+              cout << line << " IS Safe with damper (removed position " << i
+                   << ")" << endl;
+              safe += 1;
+              break;
+            }
+          }
+        }
       }
-      cout << line << " is NOT safe" << endl;
     }
     input.close();
 

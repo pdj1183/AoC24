@@ -1,4 +1,7 @@
 .DS_Store
 input.txt
+test.txt
+results.txt
+build/
 
 
